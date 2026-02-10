@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import sys
+import os
+from aiohttp import web  # Додано для веб-сервера
 from aiogram import F
 from aiogram.filters import Command
 from aiogram.types import ErrorEvent
@@ -19,7 +21,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# --- 2. Глобальний захист від падіння ---
+# --- 2. Веб-сервер для "обману" Render (Port Binding) ---
+async def handle(request):
+    """Проста відповідь для Render Health Check"""
+    return web.Response(text="Бот працює!")
+
+async def start_web_server():
+    """Запуск сервера на порту, який надає Render"""
+    app = web.Application()
+    app.router.add_get("/", handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    
+    # Отримуємо порт з оточення Render, за замовчуванням 10000
+    port = int(os.environ.get("PORT", 10000))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    logger.info(f"Веб-сервер запущено на порту {port}")
+
+# --- 3. Глобальний захист від падіння ---
 @dp.errors()
 async def error_handler(event: ErrorEvent):
     logger.error(f"Критична помилка: {event.exception}")
@@ -34,14 +54,18 @@ async def error_handler(event: ErrorEvent):
     return True
 
 async def main():
-    # 3. Ініціалізація бази даних (з оновленою структурою)
+    # 4. Ініціалізація бази даних
     init_db()
 
-    # 4. Підключення Middlewares
+    # 5. ЗАПУСК ВЕБ-СЕРВЕРА
+    # Це дозволить Render бачити відкритий порт і тримати сервіс "Live"
+    await start_web_server()
+
+    # 6. Підключення Middlewares
     dp.message.middleware(LoggingMiddleware())
     dp.message.middleware(AntiSpamMiddleware(limit=1.2))
 
-    # --- 5. Реєстрація хендлерів ---
+    # --- 7. Реєстрація хендлерів ---
 
     # Системні команди
     dp.message.register(handlers.start_handler, Command("start"))
@@ -68,7 +92,7 @@ async def main():
         F.data.in_(["confirm_calc", "cancel_calc"])
     )
 
-    # НОВИЙ: Вибір типу операції (Купівля/Продаж)
+    # Вибір типу операції (Купівля/Продаж)
     dp.callback_query.register(
         handlers.operation_type_handler, 
         F.data.startswith("op_")
@@ -86,9 +110,9 @@ async def main():
         F.data.startswith("admin_")
     )
 
-    # --- 6. Запуск бота ---
+    # --- 8. Запуск бота ---
     try:
-        logger.info("Бот запущений з підтримкою подвійних курсів!")
+        logger.info("Бот запущений з підтримкою подвійних курсів та веб-сервером!")
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
     except Exception as e:
