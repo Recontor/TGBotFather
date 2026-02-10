@@ -42,8 +42,8 @@ def calculation_choice_buttons():
 def operation_type_buttons():
     return types.InlineKeyboardMarkup(inline_keyboard=[
         [
-            types.InlineKeyboardButton(text="Купиляємо валюту", callback_data="op_buy"),
-            types.InlineKeyboardButton(text="Продаємо валюту", callback_data="op_sell")
+            types.InlineKeyboardButton(text="Купляємо валюту(ми беремо)", callback_data="op_buy"),
+            types.InlineKeyboardButton(text="Продаємо валюту(ми видаємо)", callback_data="op_sell")
         ],
         [types.InlineKeyboardButton(text="⬅️ Назад", callback_data="cancel_calc")]
     ])
@@ -75,7 +75,7 @@ async def menu_handler(message: types.Message, state: FSMContext):
         )
     elif message.text == "📞 Контакти":
         await message.answer(
-            "📞 **Наші контакти:**\n\nКиївстар: `+380 96 782 4474`\nVodafone: `+380 95 454 0922`\n Написати в телеграм: ",
+            "📞 **Наші контакти:**\n\nКиївстар: `+380 96 782 4474`\nVodafone: `+380 95 454 0922`\n Написати в телеграм: +380 95 454 0922",
             parse_mode="Markdown"
         )
     elif message.text == "Меню":
