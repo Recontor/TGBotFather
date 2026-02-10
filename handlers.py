@@ -23,7 +23,7 @@ main_menu = types.ReplyKeyboardMarkup(
 def currency_buttons():
     return types.InlineKeyboardMarkup(inline_keyboard=[
         [types.InlineKeyboardButton(text="💵USD новий", callback_data="currency_USD"),
-         types.InlineKeyboardButton(text="🇺🇸USD старий", callback_data="currency_USD White")],
+         types.InlineKeyboardButton(text="🇺🇸USD старий", callback_data="currency_USDW")],
         [types.InlineKeyboardButton(text="🇪🇺EUR", callback_data="currency_EUR"),
          types.InlineKeyboardButton(text="🇵🇱PLN", callback_data="currency_PLN")],
         [types.InlineKeyboardButton(text="🇬🇧GBP", callback_data="currency_GBP"),
